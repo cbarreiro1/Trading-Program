@@ -8,10 +8,17 @@ SECRET_KEY = "67nqMnGmsi67BhZQTWWnQX8rhvw3xMcHrnp9TKJc"
 # Initiate class
 crypto_stream = CryptoDataStream(API_KEY, SECRET_KEY)
 
+prev_price = 0
+curr_price = 0
+i = 0
+
 async def bar_callback(bar):
-    for property_name, value in bar:
-        print(f"\"{property_name}\": {value}")
-    print("\n")
+    if i % 5 == 0:
+        for property_name, value in bar:
+            if property_name == "close":
+                prev_price = curr_price
+                curr_price = float(value)
+    i += i
 
 # Subscribing to bar event 
 symbol = "BTC/USD"
