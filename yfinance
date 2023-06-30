@@ -1,0 +1,40 @@
+#This code calculates the 9 EMA and updates it every minute
+
+
+import yfinance as yf
+import pandas as pd
+import time
+
+STOCK_SYMBOL = 'AAPL'
+EMA_PERIOD = 9
+INTERVAL = 60  # Interval in seconds (1 minute)
+
+price_history = pd.DataFrame(columns=['Timestamp', 'Price'])
+
+while True:
+    # Retrieve live price data for Apple
+    stock = yf.Ticker(STOCK_SYMBOL)
+    data = stock.history(period='1d')
+
+    # Get the latest price
+    latest_price = data['Close'][-1]
+    timestamp = time.strftime('%Y-%m-%d %H:%M:%S')
+
+    # Append the latest price to the price history dataframe
+    price_history = pd.concat([price_history, pd.DataFrame({'Timestamp': [timestamp], 'Price': [latest_price]})],
+                              ignore_index=True)
+
+    # Calculate the 9-day EMA if enough data points are available
+    if len(price_history) >= EMA_PERIOD:
+        ema = price_history['Price'].ewm(span=EMA_PERIOD, adjust=False).mean()
+        latest_ema = ema.iloc[-1]
+        print('Latest Price:', latest_price)
+        print('Latest EMA:', latest_ema)
+        print('Timestamp:', timestamp)
+
+    # Wait for the specified interval before fetching the data again
+    time.sleep(INTERVAL)
+
+    # Remove older price data if the price history exceeds the EMA period
+    if len(price_history) > EMA_PERIOD:
+        price_history = price_history.tail(EMA_PERIOD)
