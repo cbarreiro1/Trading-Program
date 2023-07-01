@@ -1,40 +1,50 @@
-#This code calculates the 9 EMA and updates it every minute
-
+#GETS 9, 12, AND 26 EMA USING HISTORICAL AND LIVE DATA
 
 import yfinance as yf
 import pandas as pd
 import time
 
 STOCK_SYMBOL = 'AAPL'
-EMA_PERIOD = 9
-INTERVAL = 60  # Interval in seconds (1 minute)
+EMA_PERIODS = [9, 12, 26]
+INTERVAL = 300  # Interval in seconds (5 minutes)
+HISTORICAL_PERIOD = '7d'
 
-price_history = pd.DataFrame(columns=['Timestamp', 'Price'])
+# Retrieve historical price data for the past 7 trading days with 5-minute interval
+stock = yf.Ticker(STOCK_SYMBOL)
+historical_data = stock.history(period=HISTORICAL_PERIOD, interval='5m')
+
+# Initialize the price history dataframe with historical data
+price_history = historical_data[['Close']].reset_index().rename(columns={'Datetime': 'Timestamp'})
 
 while True:
     # Retrieve live price data for Apple
-    stock = yf.Ticker(STOCK_SYMBOL)
-    data = stock.history(period='1d')
+    data = stock.history(period='1d', interval='5m')
 
     # Get the latest price
     latest_price = data['Close'][-1]
     timestamp = time.strftime('%Y-%m-%d %H:%M:%S')
 
     # Append the latest price to the price history dataframe
-    price_history = pd.concat([price_history, pd.DataFrame({'Timestamp': [timestamp], 'Price': [latest_price]})],
+    price_history = pd.concat([price_history, pd.DataFrame({'Timestamp': [timestamp], 'Close': [latest_price]})],
                               ignore_index=True)
 
-    # Calculate the 9-day EMA if enough data points are available
-    if len(price_history) >= EMA_PERIOD:
-        ema = price_history['Price'].ewm(span=EMA_PERIOD, adjust=False).mean()
-        latest_ema = ema.iloc[-1]
+    # Calculate the EMAs if enough historical data points are available
+    if len(price_history) >= max(EMA_PERIODS):
+        emas = {}
+        for ema_period in EMA_PERIODS:
+            ema = price_history['Close'].ewm(span=ema_period, adjust=False).mean()
+            latest_ema = ema.iloc[-1]
+            emas[ema_period] = latest_ema
+
         print('Latest Price:', latest_price)
-        print('Latest EMA:', latest_ema)
+        print('Latest EMA(9):', emas[9])
+        print('Latest EMA(12):', emas[12])
+        print('Latest EMA(26):', emas[26])
         print('Timestamp:', timestamp)
 
     # Wait for the specified interval before fetching the data again
     time.sleep(INTERVAL)
 
-    # Remove older price data if the price history exceeds the EMA period
-    if len(price_history) > EMA_PERIOD:
-        price_history = price_history.tail(EMA_PERIOD)
+    # Remove older price data if the price history exceeds the maximum EMA period
+    if len(price_history) > max(EMA_PERIODS):
+        price_history = price_history.tail(max(EMA_PERIODS))
