@@ -1,24 +1,30 @@
-#GETS 9, 12, AND 26 EMA USING HISTORICAL AND LIVE DATA
-
 import yfinance as yf
 import pandas as pd
+import matplotlib.pyplot as plt
 import time
 
 STOCK_SYMBOL = 'AAPL'
-EMA_PERIODS = [9, 12, 26]
-INTERVAL = 300  # Interval in seconds (5 minutes)
+EMA_PERIODS = [12, 26]
+INTERVAL = 60  # Interval in seconds (1 minute)
 HISTORICAL_PERIOD = '7d'
 
-# Retrieve historical price data for the past 7 trading days with 5-minute interval
+# Retrieve historical price data for the past 7 trading days with 1-minute interval
 stock = yf.Ticker(STOCK_SYMBOL)
-historical_data = stock.history(period=HISTORICAL_PERIOD, interval='5m')
+historical_data = stock.history(period=HISTORICAL_PERIOD, interval='1m')
 
 # Initialize the price history dataframe with historical data
 price_history = historical_data[['Close']].reset_index().rename(columns={'Datetime': 'Timestamp'})
 
+# Initialize the MACD data
+macd_data = pd.DataFrame(columns=['Timestamp', 'MACD Line', 'Signal Line'])
+
 while True:
     # Retrieve live price data for Apple
-    data = stock.history(period='1d', interval='5m')
+    data = stock.history(period='1d', interval='1m')
+
+    # Check if the data DataFrame is empty
+    if data.empty:
+        continue  # Skip the current iteration and continue with the next one
 
     # Get the latest price
     latest_price = data['Close'][-1]
@@ -28,7 +34,7 @@ while True:
     price_history = pd.concat([price_history, pd.DataFrame({'Timestamp': [timestamp], 'Close': [latest_price]})],
                               ignore_index=True)
 
-    # Calculate the EMAs if enough historical data points are available
+    # Calculate the MACD line and signal line if enough historical data points are available
     if len(price_history) >= max(EMA_PERIODS):
         emas = {}
         for ema_period in EMA_PERIODS:
@@ -36,11 +42,31 @@ while True:
             latest_ema = ema.iloc[-1]
             emas[ema_period] = latest_ema
 
+        macd_line = emas[12] - emas[26]
+        macd_line_series = pd.Series(macd_line)  # Convert to a Series
+        signal_line = macd_line_series.ewm(span=9, adjust=False).mean()
+
+        macd_data = macd_data.append({'Timestamp': timestamp, 'MACD Line': macd_line, 'Signal Line': signal_line},
+                                     ignore_index=True)
+
         print('Latest Price:', latest_price)
-        print('Latest EMA(9):', emas[9])
-        print('Latest EMA(12):', emas[12])
-        print('Latest EMA(26):', emas[26])
+        print('MACD Line:', macd_line)
+        print('Signal Line:', signal_line)
         print('Timestamp:', timestamp)
+
+    # Convert the 'Timestamp' column to pandas datetime object
+    price_history['Timestamp'] = pd.to_datetime(price_history['Timestamp'])
+    macd_data['Timestamp'] = pd.to_datetime(macd_data['Timestamp'])
+
+    # Plot the price, MACD line, and signal line on a chart
+    plt.plot(price_history['Timestamp'], price_history['Close'], label='Price')
+    plt.plot(macd_data['Timestamp'], macd_data['MACD Line'], label='MACD Line')
+    plt.plot(macd_data['Timestamp'], macd_data['Signal Line'], label='Signal Line')
+    plt.xlabel('Timestamp')
+    plt.ylabel('Value')
+    plt.title('MACD Indicator')
+    plt.legend()
+    plt.show()
 
     # Wait for the specified interval before fetching the data again
     time.sleep(INTERVAL)
