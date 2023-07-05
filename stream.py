@@ -20,6 +20,12 @@ price_history['MACD Line'] = price_history['Close'].ewm(span=EMA_PERIODS[0], adj
                              price_history['Close'].ewm(span=EMA_PERIODS[1], adjust=False).mean()
 price_history['Signal Line'] = price_history['MACD Line'].ewm(span=EMA_PERIODS[2], adjust=False).mean()
 
+# Plot the graph
+plt.xlabel('Timestamp')
+plt.ylabel('Price')
+plt.title('MACD Indicator')
+plt.legend()
+
 while True:
     # Retrieve live price data for Apple
     data = stock.history(period='1d', interval=INTERVAL)
@@ -49,11 +55,10 @@ while True:
     # Plot the graph
     plt.plot(price_history['Timestamp'], price_history['MACD Line'], label='MACD Line')
     plt.plot(price_history['Timestamp'], price_history['Signal Line'], label='Signal Line')
-    plt.xlabel('Timestamp')
-    plt.ylabel('Price')
-    plt.title('MACD Indicator')
-    plt.legend()
-    plt.show()
+
+    # Show the updated plot
+    plt.pause(0.01)  # Display the plot for a short duration without blocking
 
     # Wait for the specified interval before fetching the data again
     time.sleep(60)
+    
