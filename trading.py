@@ -2,10 +2,11 @@ import yfinance as yf
 import alpaca_trade_api as tradeapi
 import pandas as pd
 import time
+from message import send_text
 
-STOCK_SYMBOL = 'AAPL'
+STOCK_SYMBOL = 'CRBU'
 EMA_PERIODS = [12, 26, 9]
-INTERVAL = '1m'  # Interval for price data
+INTERVAL = '5m'  # Interval for price data
 HISTORICAL_PERIOD = '7d'
 BASE_URL = 'https://paper-api.alpaca.markets'  # Paper trading API base URL
 
@@ -35,6 +36,8 @@ def buy(symbol, quantity):
         side='buy',
         type='market',
         time_in_force='gtc'
+
+        send_text(f"{quantity} share(s) of {symbol} have been bought")
     )
 
 # Function to execute a sell order
@@ -45,6 +48,8 @@ def sell(symbol, quantity):
         side='sell',
         type='market',
         time_in_force='gtc'
+
+        send_text(f"{quantity} share(s) of {symbol} have been sold")
     )
     
 # Retrieve historical price data for the past 7 trading days
@@ -60,7 +65,7 @@ price_history['MACD Line'] = price_history['Close'].ewm(span=EMA_PERIODS[0], adj
 price_history['Signal Line'] = price_history['MACD Line'].ewm(span=EMA_PERIODS[2], adjust=False).mean()
 
 while True:
-    # Fetch the latest data for Apple
+    # Fetch the latest data for the stock
     stock_data = yf.download(STOCK_SYMBOL, period='1d', interval=INTERVAL)
     latest_price = stock_data['Close'][-1]
     timestamp = stock_data.index[-1]
@@ -76,12 +81,12 @@ while True:
 
     # Check if MACD crossover happened and execute a buy order
     if is_macd_crossover(price_history):
-        buy(STOCK_SYMBOL, 1)
+        buy(STOCK_SYMBOL, 1000)
         print('Buy signal detected. Executing buy order.')
 
     # Check if MACD crossunder happened and execute a sell order
     if is_macd_crossunder(price_history):
-        sell(STOCK_SYMBOL, 1)
+        sell(STOCK_SYMBOL, 1000)
         print('Sell signal detected. Executing sell order.')
 
     # Print the latest values
@@ -94,4 +99,4 @@ while True:
     print()
 
     # Wait for the specified interval before fetching the data again
-    time.sleep(60)
+    time.sleep(300)
