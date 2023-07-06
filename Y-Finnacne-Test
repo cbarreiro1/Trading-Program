@@ -1,4 +1,0 @@
-yf.pdr_override() 
-
-stock=input("Enter a stock symbol: ")
-print(stock)

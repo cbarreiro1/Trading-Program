@@ -1,0 +1,95 @@
+import yfinance as yf
+import alpaca_trade_api as tradeapi
+import pandas as pd
+import time
+
+STOCK_SYMBOLS = ['AAPL', 'BTC-USD', 'TSLA', 'AMZN', 'SPY']
+EMA_PERIODS = [12, 26, 9]
+INTERVAL = '1m'  # Interval for price data
+HISTORICAL_PERIOD = '7d'
+BASE_URL = 'https://paper-api.alpaca.markets'  # Paper trading API base URL
+
+# Alpaca API credentials (replace these with your own)
+APCA_API_BASE_URL = 'https://paper-api.alpaca.markets'
+APCA_API_KEY_ID = 'PKKNHC1RL6MH0OVXSGP5'
+APCA_API_SECRET_KEY = 'TPjwvFSmfPWt1H85LlikVsF4bunVfkjzIWtHoJsG'
+
+# Initialize the Alpaca API client
+api = tradeapi.REST(APCA_API_KEY_ID, APCA_API_SECRET_KEY, APCA_API_BASE_URL, api_version='v2')
+
+# Function to check if the MACD crossover happened
+def is_macd_crossover(price_history):
+    return price_history['MACD Line'].iloc[-2] < price_history['Signal Line'].iloc[-2] and \
+           price_history['MACD Line'].iloc[-1] > price_history['Signal Line'].iloc[-1]
+
+# Function to check if the MACD crossunder happened
+def is_macd_crossunder(price_history):
+    return price_history['MACD Line'].iloc[-2] > price_history['Signal Line'].iloc[-2] and \
+           price_history['MACD Line'].iloc[-1] < price_history['Signal Line'].iloc[-1]
+
+# Function to execute a buy order
+def buy(symbol, quantity):
+    api.submit_order(
+        symbol=symbol,
+        qty=quantity,
+        side='buy',
+        type='market',
+        time_in_force='gtc'
+    )
+
+# Function to execute a sell order
+def sell(symbol, quantity):
+    api.submit_order(
+        symbol=symbol,
+        qty=quantity,
+        side='sell',
+        type='market',
+        time_in_force='gtc'
+    )
+
+# Create a dictionary to store the price history for each stock
+price_history = {}
+
+# Retrieve historical price data for each stock
+for symbol in STOCK_SYMBOLS:
+    stock = yf.Ticker(symbol)
+    historical_data = stock.history(period=HISTORICAL_PERIOD, interval=INTERVAL)
+    price_history[symbol] = historical_data[['Close']].reset_index().rename(columns={'Datetime': 'Timestamp'})
+
+while True:
+    # Fetch the latest data for each stock
+    for symbol in STOCK_SYMBOLS:
+        stock_data = yf.download(symbol, period='1d', interval=INTERVAL)
+        latest_price = stock_data['Close'][-1]
+        timestamp = stock_data.index[-1]
+
+        # Append the latest price to the price history dataframe
+        price_history[symbol] = pd.concat([price_history[symbol], pd.DataFrame({'Timestamp': [timestamp], 'Close': [latest_price]})],
+                                          ignore_index=True)
+
+        # Calculate MACD line and signal line
+        price_history[symbol]['MACD Line'] = price_history[symbol]['Close'].ewm(span=EMA_PERIODS[0], adjust=False).mean() - \
+                                             price_history[symbol]['Close'].ewm(span=EMA_PERIODS[1], adjust=False).mean()
+        price_history[symbol]['Signal Line'] = price_history[symbol]['MACD Line'].ewm(span=EMA_PERIODS[2], adjust=False).mean()
+
+        # Check if MACD crossover happened and execute a buy order
+        if is_macd_crossover(price_history[symbol]):
+            buy(symbol, 1)
+            print('Buy signal detected for', symbol, '. Executing buy order.')
+
+        # Check if MACD crossunder happened and execute a sell order
+        if is_macd_crossunder(price_history[symbol]):
+            sell(symbol, 1)
+            print('Sell signal detected for', symbol, '. Executing sell order.')
+
+        # Print the latest values
+        latest_macd = price_history[symbol]['MACD Line'].iloc[-1]
+        latest_signal = price_history[symbol]['Signal Line'].iloc[-1]
+        print('Latest Price for', symbol, ':', latest_price)
+        print('MACD Line for', symbol, ':', latest_macd)
+        print('Signal Line for', symbol, ':', latest_signal)
+        print('Timestamp for', symbol, ':', timestamp)
+        print()
+
+    # Wait for the specified interval before fetching the data again
+    time.sleep(60)
