@@ -37,7 +37,7 @@ def buy(symbol, quantity):
         type='market',
         time_in_force='gtc'
 
-        send_text(f"{quantity} share(s) of {symbol} have been bought")
+        send_text(text)
     )
 
 # Function to execute a sell order
@@ -49,7 +49,7 @@ def sell(symbol, quantity):
         type='market',
         time_in_force='gtc'
 
-        send_text(f"{quantity} share(s) of {symbol} have been sold")
+        send_text(text)
     )
     
 # Retrieve historical price data for the past 7 trading days

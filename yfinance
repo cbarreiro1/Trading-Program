@@ -2,17 +2,26 @@ import yfinance as yf
 import alpaca_trade_api as tradeapi
 import pandas as pd
 import time
+from message import send_text
 
-STOCK_SYMBOLS = ['AAPL', 'BTC-USD', 'TSLA', 'AMZN', 'SPY']
+CRYPTO_SYMBOLS = ['BTC/USD', 'ETH/USD']  # Top cryptocurrency symbols
+SYMBOL_MAPPING = {
+    'BTC/USD': 'BTC-USD',
+    'ETH/USD': 'ETH-USD'
+}
+SHARES_HELD = {
+    'BTC/USD': 0,
+    'ETH/USD': 0
+}
 EMA_PERIODS = [12, 26, 9]
 INTERVAL = '1m'  # Interval for price data
-HISTORICAL_PERIOD = '7d'
+HISTORICAL_PERIOD = '5d'
 BASE_URL = 'https://paper-api.alpaca.markets'  # Paper trading API base URL
 
 # Alpaca API credentials (replace these with your own)
 APCA_API_BASE_URL = 'https://paper-api.alpaca.markets'
-APCA_API_KEY_ID = 'PKKNHC1RL6MH0OVXSGP5'
-APCA_API_SECRET_KEY = 'TPjwvFSmfPWt1H85LlikVsF4bunVfkjzIWtHoJsG'
+APCA_API_KEY_ID = 'PKD2SNVTL4MK3CWY0Z3F'
+APCA_API_SECRET_KEY = 'ImchqiPGdvb2PKXNaxZhIKIjbEpnuiauTl1R0eVl'
 
 # Initialize the Alpaca API client
 api = tradeapi.REST(APCA_API_KEY_ID, APCA_API_SECRET_KEY, APCA_API_BASE_URL, api_version='v2')
@@ -29,6 +38,12 @@ def is_macd_crossunder(price_history):
 
 # Function to execute a buy order
 def buy(symbol, quantity):
+    # Check if shares are already held for the symbol
+    current_quantity = SHARES_HELD[symbol]
+    if current_quantity > 0:
+        print('Shares of', symbol, 'are already being held. Skipping buy order.')
+        return
+
     api.submit_order(
         symbol=symbol,
         qty=quantity,
@@ -37,8 +52,19 @@ def buy(symbol, quantity):
         time_in_force='gtc'
     )
 
+    latest_price = price_history[symbol]['Close'].iloc[-1]  # Get the latest price for the symbol
+    total_price = latest_price * quantity
+    send_text(f"{quantity} share(s) of {symbol} have been bought for ${total_price:.2f}")
+    SHARES_HELD[symbol] += quantity
+
 # Function to execute a sell order
 def sell(symbol, quantity):
+    # Check if shares are held for the symbol
+    current_quantity = SHARES_HELD[symbol]
+    if current_quantity == 0:
+        print('No shares of', symbol, 'are currently held. Skipping sell order.')
+        return
+
     api.submit_order(
         symbol=symbol,
         qty=quantity,
@@ -47,21 +73,28 @@ def sell(symbol, quantity):
         time_in_force='gtc'
     )
 
-# Create a dictionary to store the price history for each stock
+    latest_price = price_history[symbol]['Close'].iloc[-1]  # Get the latest price for the symbol
+    total_price = latest_price * quantity
+    send_text(f"{quantity} share(s) of {symbol} have been sold for ${total_price:.2f}")
+    SHARES_HELD[symbol] -= quantity
+
+# Create a dictionary to store the price history for each cryptocurrency
 price_history = {}
 
-# Retrieve historical price data for each stock
-for symbol in STOCK_SYMBOLS:
-    stock = yf.Ticker(symbol)
-    historical_data = stock.history(period=HISTORICAL_PERIOD, interval=INTERVAL)
+# Retrieve historical price data for each cryptocurrency
+for symbol in CRYPTO_SYMBOLS:
+    crypto_symbol = SYMBOL_MAPPING[symbol]  # Map the symbol to the one used by yfinance and Alpaca
+    crypto = yf.Ticker(crypto_symbol)
+    historical_data = crypto.history(period=HISTORICAL_PERIOD, interval=INTERVAL)
     price_history[symbol] = historical_data[['Close']].reset_index().rename(columns={'Datetime': 'Timestamp'})
 
 while True:
-    # Fetch the latest data for each stock
-    for symbol in STOCK_SYMBOLS:
-        stock_data = yf.download(symbol, period='1d', interval=INTERVAL)
-        latest_price = stock_data['Close'][-1]
-        timestamp = stock_data.index[-1]
+    # Fetch the latest data for each cryptocurrency
+    for symbol in CRYPTO_SYMBOLS:
+        crypto_symbol = SYMBOL_MAPPING[symbol]  # Map the symbol to the one used by yfinance and Alpaca
+        crypto_data = yf.download(crypto_symbol, period='1d', interval=INTERVAL)
+        latest_price = crypto_data['Close'][-1]
+        timestamp = crypto_data.index[-1]
 
         # Append the latest price to the price history dataframe
         price_history[symbol] = pd.concat([price_history[symbol], pd.DataFrame({'Timestamp': [timestamp], 'Close': [latest_price]})],
@@ -93,3 +126,4 @@ while True:
 
     # Wait for the specified interval before fetching the data again
     time.sleep(60)
+    
