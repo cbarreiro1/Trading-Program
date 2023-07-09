@@ -1,6 +1,6 @@
 import smtplib
 
-def send_text(message):
+def send_text(message:str):
     # Email information
     SMTP_SERVER = 'smtp.gmail.com'
     SMTP_PORT = 587
