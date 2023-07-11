@@ -1,11 +1,7 @@
-CRYPTO_SYMBOLS = ['BTCUSD', 'ETHUSD']  # Top cryptocurrency symbols
-SYMBOL_MAPPING = {
-    'BTCUSD': 'BTC-USD',
-    'ETHUSD': 'ETH-USD'
-}
+STOCK_SYMBOLS = ['GDTC', 'BTTX', 'GRRR', 'CING', 'TCBP']  # Top cryptocurrency symbols
 EMA_PERIODS = [12, 26, 9]
-INTERVAL = '1m'  # Interval for price data
-HISTORICAL_PERIOD = '5d'
+INTERVAL = '15m'  # Interval for price data
+HISTORICAL_PERIOD = '7d'
 BASE_URL = 'https://paper-api.alpaca.markets'  # Paper trading API base URL
 
 # Alpaca API credentials (replace these with your own)
