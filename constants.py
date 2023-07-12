@@ -1,4 +1,4 @@
-STOCK_SYMBOLS = ['GDTC', 'BTTX', 'GRRR', 'CING', 'TCBP']  # Top cryptocurrency symbols
+STOCK_SYMBOLS = ['GDTC', 'BTTX', 'GRRR', 'CING', 'TCBP']  # Top stock symbols
 EMA_PERIODS = [12, 26, 9]
 INTERVAL = '15m'  # Interval for price data
 HISTORICAL_PERIOD = '7d'
