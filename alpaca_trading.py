@@ -22,7 +22,7 @@ def get_shares(symbol:str) -> float:
 # Function to execute a buy order
 def buy(symbol:str, price_history:dict) -> bool:
     # Check if shares are already held for the symbol
-    if get_shares(symbol) > 0:
+    if float(get_shares(symbol)) > 0:
         print('Shares of', symbol, 'are already being held. Skipping buy order.')
         return False
     
@@ -49,7 +49,7 @@ def buy(symbol:str, price_history:dict) -> bool:
 # Function to execute a sell order
 def sell(symbol:str, price_history:dict) -> bool:
     # Check if shares are held for the symbol
-    if get_shares(symbol) == 0:
+    if float(get_shares(symbol)) == 0:
         print('No shares of', symbol, 'are currently held. Skipping sell order.')
         return False
 
