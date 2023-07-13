@@ -33,7 +33,11 @@ def buy(symbol:str, price_history:dict) -> bool:
     latest_price = price_history[symbol]['Close'].iloc[-1]  # Get the latest price for the symbol
 
     # Calculate maximum quantity of shares to buy
-    quantity = equity / latest_price
+    quantity = int(equity / latest_price)
+
+    # Checks if at least one share is being bought
+    if quantity == 0:
+        return False
 
     api.submit_order(
         symbol=symbol,

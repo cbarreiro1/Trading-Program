@@ -1,7 +1,7 @@
-STOCK_SYMBOLS = ['GDTC', 'BTTX', 'GRRR', 'CING', 'TCBP']  # Top stock symbols
+STOCK_SYMBOLS = ['RXRX', 'HCTI', 'AVRO', 'AULT', 'CVKD']  # Top stock symbols
 EMA_PERIODS = [12, 26, 9]
 INTERVAL = '15m'  # Interval for price data
-HISTORICAL_PERIOD = '7d'
+HISTORICAL_PERIOD = '1mo'
 BASE_URL = 'https://paper-api.alpaca.markets'  # Paper trading API base URL
 
 # Alpaca API credentials (replace these with your own)
