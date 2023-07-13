@@ -37,6 +37,7 @@ def buy(symbol:str, price_history:dict) -> bool:
 
     # Checks if at least one share is being bought
     if quantity == 0:
+        print('Skipping buy order. Not enough equity to buy a full share.')
         return False
 
     api.submit_order(

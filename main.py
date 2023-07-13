@@ -9,9 +9,10 @@ import datetime
 while True:
     now = datetime.datetime.now()
     current_hour = now.hour
+    current_minute = now.minute
 
-    # Check if the current time is between 9 am and 4 pm
-    if current_hour >= 9 and current_hour <= 16:
+    # Check if the current time is between 9:30 am and 4 pm
+    if (current_hour == 9 and current_minute >= 30) or (current_hour > 9 and current_hour <= 16):
         # Create a dictionary to store the price history for each stock
         price_history = {}
 
@@ -65,3 +66,4 @@ while True:
         print('Market has closed')
         print()
         break
+    
