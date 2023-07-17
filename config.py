@@ -7,10 +7,14 @@ def create_stock_bool_dict(stocks:list) -> dict:
 
     return bool_dict
     
+# Updates MACD dict to only have keys present in the stock list
 def update_macd_dict(macd_dict:dict, stocks:list):
     for stock in stocks:
         if stock not in macd_dict:
             macd_dict[stock] = False
+    for key in macd_dict.keys():
+        if key not in stocks:
+            del macd_dict[key]
 
 CONSTANT_STOCKS = ['DMAQ', 'AIMD', 'WAVSU']
 EMA_PERIODS = [12, 26, 9]
