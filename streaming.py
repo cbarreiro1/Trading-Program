@@ -6,7 +6,7 @@ from selenium.webdriver.chrome.options import Options
 import time
 from config import WEBDRIVER_PATH, CONSTANT_STOCKS
 
-def get_top_stocks() -> list:
+def get_top_stocks(number_to_look_for:int, excluded_stocks:list=[]) -> list:
     # Configure the webdriver (make sure you have the appropriate driver executable installed)
     options = Options()
     options.add_argument(WEBDRIVER_PATH)
@@ -17,7 +17,7 @@ def get_top_stocks() -> list:
 
     # Wait for the Gainers table to load
     time.sleep(2)  # Add a delay to allow the page to load
-    gainers_table = WebDriverWait(driver, 1).until(EC.presence_of_element_located((By.XPATH, '//*[@id="bz-gainers-table"]')))
+    gainers_table = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, '//*[@id="bz-gainers-table"]')))
     gainers_rows = gainers_table.find_elements(By.XPATH, './/tbody/tr')
 
     # Create a list to store the stock data
@@ -38,7 +38,7 @@ def get_top_stocks() -> list:
     print(f'Current Top Stocks Based on % Change')
     count = 0
     for stock in sorted_stocks:
-        if stock['symbol'] not in CONSTANT_STOCKS and count < 3:
+        if stock['symbol'] not in CONSTANT_STOCKS and stock['symbol'] not in excluded_stocks and count < number_to_look_for:
             print(f"Symbol: {stock['symbol']}, Percent Change: {stock['percent_change']}")
             top_stocks.append(stock['symbol'])
             count += 1

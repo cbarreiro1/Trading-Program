@@ -5,13 +5,14 @@ import pandas as pd
 import time
 import yfinance as yf
 from streaming import get_top_stocks
-from datetime import datetime, time, timedelta
+from datetime import datetime, time
 
 # Set the start and end time for the loop
 start_time = time(9, 30)  # 9:30 am
 end_time = time(16, 0)  # 4:00 pm
 
-stock_symbols = CONSTANT_STOCKS + get_top_stocks() # We give 5 stocks and benzinga gives 3 more
+added_stocks = [] # Stocks that have been bought not in CONSTANT_STOCKS
+stock_symbols = CONSTANT_STOCKS + get_top_stocks(8 - len(CONSTANT_STOCKS)) # We give stocks and it fills more in to make 8
 macd_crossover = create_stock_bool_dict(stock_symbols)
 macd_crossed_0 = create_stock_bool_dict(stock_symbols)
 
@@ -56,9 +57,11 @@ while True:
                 if latest_macd >= 0:
                     macd_crossed_0[symbol] = True
 
-                # Check if MACD has crossed over and been greater than 0
+                # Check if MACD has had a crossover and been greater than 0
                 if macd_crossover[symbol] and macd_crossed_0[symbol]:
                     if buy(symbol, price_history):
+                        if symbol not in CONSTANT_STOCKS and symbol not in added_stocks:
+                            added_stocks.append(symbol)
                         print('Buy signal detected for', symbol, '. Executing buy order.')
 
                 # Check if MACD crossunder happened or if MACD < 0 and execute a sell order
@@ -77,15 +80,13 @@ while True:
                 print('Timestamp for', symbol, ':', timestamp)
                 print()
 
-            # Update 10 minute counter
-            if current_time.minute % 10 == 0:
-                stock_symbols = CONSTANT_STOCKS + get_top_stocks() 
+            # Checks top stocks every 10 minutes
+            if current_time.minute % 10 == 0 and (len(CONSTANT_STOCKS) + len(added_stocks)) < 8:
+                stock_symbols = CONSTANT_STOCKS + added_stocks + get_top_stocks(8 - len(CONSTANT_STOCKS) - len(added_stocks), added_stocks)
                 update_macd_dict(macd_crossover, stock_symbols)
                 update_macd_dict(macd_crossed_0, stock_symbols)
 
-        time.sleep(1)
-
-    # Checks if it is currently past 4pm
+    # Checks if it is currently past 4 pm
     else:
         print('Market has closed')
         print()

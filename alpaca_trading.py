@@ -69,6 +69,6 @@ def sell(symbol:str, price_history:dict) -> bool:
     )
 
     latest_price = price_history[symbol]['Close'].iloc[-1]  # Get the latest price for the symbol
-    total_price = latest_price * float(quantity)
+    total_price = latest_price * int(quantity)
     send_text(f"{quantity} share(s) of {symbol} have been sold for ${total_price:.2f}")
     return True

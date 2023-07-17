@@ -23,5 +23,5 @@ APCA_API_BASE_URL = 'https://paper-api.alpaca.markets'
 APCA_API_KEY_ID = 'PKD2SNVTL4MK3CWY0Z3F'
 APCA_API_SECRET_KEY = 'ImchqiPGdvb2PKXNaxZhIKIjbEpnuiauTl1R0eVl'
 
-# Webdriver Path on Local Machine
+# Webdriver path on local machine
 WEBDRIVER_PATH = 'C:\\Users\\cjgat\\Downloads\\chromedriver_win32\\chromedriver.exe'
