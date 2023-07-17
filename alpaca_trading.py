@@ -1,5 +1,5 @@
 import alpaca_trade_api as tradeapi
-from constants import APCA_API_BASE_URL, APCA_API_KEY_ID, APCA_API_SECRET_KEY
+from config import APCA_API_BASE_URL, APCA_API_KEY_ID, APCA_API_SECRET_KEY
 import pandas as pd
 from message import send_text
 

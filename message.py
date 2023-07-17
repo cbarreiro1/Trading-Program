@@ -5,7 +5,7 @@ def send_text(message:str):
     SMTP_SERVER = 'smtp.gmail.com'
     SMTP_PORT = 587
     SENDER_EMAIL = 'sammi.trader.1@gmail.com'
-    SENDER_APP_PASSWORD = 'kcxmqxexdgpsotvz'  # Replace with the generated app password
+    SENDER_APP_PASSWORD = 'cnrcdmpwudplinch'
 
     # Recipient's phone number and SMS gateway domain (Verizon)
     CJ_NUMBER = '7574022986'
