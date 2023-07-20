@@ -24,7 +24,7 @@ while True:
 
         # Fetch the latest data for each stock
         for symbol in STOCK_SYMBOLS:
-            stock_data = yf.download(symbol, period='1mo', interval=INTERVAL)
+            stock_data = yf.download(symbol, period='7d', interval=INTERVAL)
             latest_price = stock_data['Close'][-1]
             timestamp = stock_data.index[-1]
 
@@ -59,7 +59,7 @@ while True:
             print()
 
         # Wait for the specified interval before fetching the data again
-        time.sleep(900) # 15 minutes
+        time.sleep(300) # 5 minutes
 
     # Checks if it is currently past 4pm
     elif current_hour > 16:
