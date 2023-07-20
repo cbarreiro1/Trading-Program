@@ -113,6 +113,7 @@ while True:
     elif current_time > end_time:
         print('Market has closed')
         print()
-        sort_stock_table()
+        sort_stock_status_table()
+        sort_stock_data_table()
         break
     

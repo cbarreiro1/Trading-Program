@@ -17,6 +17,27 @@ def update_stock_data_to_database(symbol, latest_price, latest_macd, latest_sign
     conn.commit()
     conn.close()
 
+def sort_stock_data_table():
+    conn = sqlite3.connect('database.db')
+    cursor = conn.cursor()
+
+    # Retrieve all data from the stock_data table
+    cursor.execute('SELECT * FROM stock_data')
+    data = cursor.fetchall()
+
+    # Sort the data by symbol and then within each symbol, sort by timestamp
+    sorted_data = sorted(data, key=lambda x: (x[0], x[4]))
+
+    # Clear the existing data from the stock_data table
+    cursor.execute('DELETE FROM stock_data')
+
+    # Insert the sorted data back into the stock_data table
+    cursor.executemany('''INSERT INTO stock_data (symbol, latest_price, latest_macd, latest_signal, timestamp)
+                          VALUES (?, ?, ?, ?, ?)''', sorted_data)
+
+    conn.commit()
+    conn.close()
+
 def update_stock_database(stock_symbols):
     conn = sqlite3.connect('database.db')
     cursor = conn.cursor()
@@ -35,7 +56,7 @@ def update_stock_database(stock_symbols):
     conn.commit()
     conn.close()
 
-def sort_stock_table():
+def sort_stock_status_table():
     conn = sqlite3.connect('database.db')
     cursor = conn.cursor()
 
