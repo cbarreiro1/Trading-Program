@@ -14,7 +14,9 @@ end_time = time(16, 0)  # 4:00 pm
 
 # Get the symbols of stocks that are already held
 held_stocks = get_held_stocks()
-added_stocks = [] # Stocks that have been bought not in CONSTANT_STOCKS
+
+# Stocks that have been bought not in CONSTANT_STOCKS
+added_stocks = []
 for stock in held_stocks:
     if stock not in CONSTANT_STOCKS:
         added_stocks.append(stock)
