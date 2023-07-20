@@ -1,5 +1,5 @@
 import alpaca_trade_api as tradeapi
-from constants import APCA_API_BASE_URL, APCA_API_KEY_ID, APCA_API_SECRET_KEY
+from config import APCA_API_BASE_URL, APCA_API_KEY_ID, APCA_API_SECRET_KEY
 import pandas as pd
 from message import send_text
 
@@ -69,6 +69,10 @@ def sell(symbol:str, price_history:dict) -> bool:
     )
 
     latest_price = price_history[symbol]['Close'].iloc[-1]  # Get the latest price for the symbol
-    total_price = latest_price * float(quantity)
+    total_price = latest_price * int(quantity)
     send_text(f"{quantity} share(s) of {symbol} have been sold for ${total_price:.2f}")
     return True
+
+# Get the symbols of stocks that are already held
+def get_held_stocks() -> list:
+    return [position.symbol for position in api.list_positions()]
