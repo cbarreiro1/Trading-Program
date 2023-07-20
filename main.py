@@ -49,19 +49,11 @@ while True:
                 historical_data = stock.history(period=HISTORICAL_PERIOD, interval=INTERVAL, prepost=True)
                 price_history[symbol] = historical_data[['Close']].reset_index().rename(columns={'Datetime': 'Timestamp'})
 
-<<<<<<< HEAD
-        # Fetch the latest data for each stock
-        for symbol in STOCK_SYMBOLS:
-            stock_data = yf.download(symbol, period='7d', interval=INTERVAL)
-            latest_price = stock_data['Close'][-1]
-            timestamp = stock_data.index[-1]
-=======
             # Fetch the latest data for each stock
             for symbol in stock_symbols:
                 stock_data = yf.download(symbol, period='7d', interval=INTERVAL)
                 latest_price = stock_data['Close'][-1]
                 timestamp = stock_data.index[-1]
->>>>>>> ab0a123d15982a013d40d2e069b283ee49a00fa7
 
                 # Append the latest price to the price history dataframe
                 price_history[symbol] = pd.concat([price_history[symbol], pd.DataFrame({'Timestamp': [timestamp], 'Close': [latest_price]})],
@@ -98,10 +90,6 @@ while True:
                         if symbol in added_stocks:
                             added_stocks.remove(symbol)
 
-<<<<<<< HEAD
-        # Wait for the specified interval before fetching the data again
-        time.sleep(300) # 5 minutes
-=======
                 # Print the latest values
                 latest_macd = price_history[symbol]['MACD Line'].iloc[-1]
                 latest_signal = price_history[symbol]['Signal Line'].iloc[-1]
@@ -110,7 +98,6 @@ while True:
                 print('Signal Line for', symbol, ':', latest_signal)
                 print('Timestamp for', symbol, ':', timestamp)
                 print()
->>>>>>> ab0a123d15982a013d40d2e069b283ee49a00fa7
 
                 # Add the information to the database
                 update_stock_data_to_database(symbol, latest_price, latest_macd, latest_signal, timestamp)

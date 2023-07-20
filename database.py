@@ -21,21 +21,29 @@ def sort_stock_data_table():
     conn = sqlite3.connect('database.db')
     cursor = conn.cursor()
 
-    # Retrieve all data from the stock_data table
-    cursor.execute('SELECT * FROM stock_data')
-    data = cursor.fetchall()
+    # Check if the stock_data table exists
+    cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='stock_data'")
+    table_exists = cursor.fetchone()
 
-    # Sort the data by symbol and then within each symbol, sort by timestamp
-    sorted_data = sorted(data, key=lambda x: (x[0], x[4]))
+    if table_exists:
+        # Retrieve all data from the stock_data table
+        cursor.execute('SELECT * FROM stock_data')
+        data = cursor.fetchall()
 
-    # Clear the existing data from the stock_data table
-    cursor.execute('DELETE FROM stock_data')
+        # Sort the data by symbol and then within each symbol, sort by timestamp
+        sorted_data = sorted(data, key=lambda x: (x[0], x[4]))
 
-    # Insert the sorted data back into the stock_data table
-    cursor.executemany('''INSERT INTO stock_data (symbol, latest_price, latest_macd, latest_signal, timestamp)
-                          VALUES (?, ?, ?, ?, ?)''', sorted_data)
+        # Clear the existing data from the stock_data table
+        cursor.execute('DELETE FROM stock_data')
 
-    conn.commit()
+        # Insert the sorted data back into the stock_data table
+        cursor.executemany('''INSERT INTO stock_data (symbol, latest_price, latest_macd, latest_signal, timestamp)
+                              VALUES (?, ?, ?, ?, ?)''', sorted_data)
+
+        conn.commit()
+    else:
+        print("stock_data table does not exist in the database.")
+
     conn.close()
 
 def update_stock_database(stock_symbols):
@@ -60,18 +68,25 @@ def sort_stock_status_table():
     conn = sqlite3.connect('database.db')
     cursor = conn.cursor()
 
-    # Sort the table based on symbol and timestamp
-    cursor.execute('SELECT * FROM stock_status ORDER BY symbol, timestamp')
-    sorted_rows = cursor.fetchall()
+    # Check if the stock_status table exists
+    cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='stock_status'")
+    table_exists = cursor.fetchone()
 
-    # Clear the existing data in the table
-    cursor.execute('DELETE FROM stock_status')
+    if table_exists:
+        # Sort the table based on symbol and timestamp
+        cursor.execute('SELECT * FROM stock_status ORDER BY symbol, timestamp')
+        sorted_rows = cursor.fetchall()
 
-    # Insert the sorted rows back into the table
-    for row in sorted_rows:
-        cursor.execute('INSERT INTO stock_status (symbol, timestamp) VALUES (?, ?)', row)
+        # Clear the existing data in the table
+        cursor.execute('DELETE FROM stock_status')
 
-    conn.commit()
+        # Insert the sorted rows back into the table
+        cursor.executemany('INSERT INTO stock_status (symbol, timestamp) VALUES (?, ?)', sorted_rows)
+
+        conn.commit()
+    else:
+        print("stock_status table does not exist in the database.")
+
     conn.close()
 
 def delete_table(table_name:str):
