@@ -72,3 +72,7 @@ def sell(symbol:str, price_history:dict) -> bool:
     total_price = latest_price * int(quantity)
     send_text(f"{quantity} share(s) of {symbol} have been sold for ${total_price:.2f}")
     return True
+
+# Get the symbols of stocks that are already held
+def get_held_stocks() -> list:
+    return [position.symbol for position in api.list_positions()]

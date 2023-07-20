@@ -1,22 +1,9 @@
-from config import update_macd_dict, add_stocks
+from database import *
+from config import CONSTANT_STOCKS
 
-dict = {'a': True,
-        'b': False
-        }
-
-list = ['a', 'b', 'c', 'd']
-list2 = ['a', 'd', 't', 'd', 's']
-
-update_macd_dict(dict, list)
-
-def add5(int):
-    int + 5
-
-int = 7
-add5(int)
-print(int)
-
-add_stocks(list, list2)
-print(list)
-
-print(dict)
+update_macd_database(stocks= CONSTANT_STOCKS)
+print(get_macd_crossover_from_database())
+update_macd_database(stock='BPTS', crossover=True)
+update_macd_database(stock='ARDS', crossover=True)
+print(get_macd_crossover_from_database())
+update_stock_database(CONSTANT_STOCKS)

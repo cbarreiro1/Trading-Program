@@ -9,14 +9,19 @@ def create_stock_bool_dict(stocks:list) -> dict:
     
 # Updates MACD dict to only have keys present in the stock list
 def update_macd_dict(macd_dict:dict, stocks:list):
+    delete = []
     for stock in stocks:
         if stock not in macd_dict:
             macd_dict[stock] = False
     for key in macd_dict.keys():
         if key not in stocks:
+            delete.append(key)
+    for key in delete:
+        if key in macd_dict.keys():
             del macd_dict[key]
 
-CONSTANT_STOCKS = ['DMAQ', 'AIMD', 'WAVSU']
+CONSTANT_STOCKS = ['SMX', 'CVNA', 'SXTP', 'PBLA', 'VRM']
+EXCLUDED_STOCKS = []
 EMA_PERIODS = [12, 26, 9]
 INTERVAL = '5m'  # Interval for price data
 HISTORICAL_PERIOD = '7d'

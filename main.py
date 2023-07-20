@@ -1,20 +1,35 @@
-from strategies import *
-from alpaca_trading import buy, sell
-from config import CONSTANT_STOCKS, INTERVAL, HISTORICAL_PERIOD, EMA_PERIODS, create_stock_bool_dict, update_macd_dict
 import pandas as pd
-import time
 import yfinance as yf
+from time import sleep
 from streaming import get_top_stocks
 from datetime import datetime, time
+from strategies import *
+from alpaca_trading import buy, sell, get_held_stocks
+from config import CONSTANT_STOCKS, INTERVAL, HISTORICAL_PERIOD, EMA_PERIODS, create_stock_bool_dict, update_macd_dict
+from database import *
 
 # Set the start and end time for the loop
 start_time = time(9, 30)  # 9:30 am
 end_time = time(16, 0)  # 4:00 pm
 
+# Get the symbols of stocks that are already held
+held_stocks = get_held_stocks()
 added_stocks = [] # Stocks that have been bought not in CONSTANT_STOCKS
-stock_symbols = CONSTANT_STOCKS + get_top_stocks(8 - len(CONSTANT_STOCKS)) # We give stocks and it fills more in to make 8
-macd_crossover = create_stock_bool_dict(stock_symbols)
-macd_crossed_0 = create_stock_bool_dict(stock_symbols)
+for stock in held_stocks:
+    if stock not in CONSTANT_STOCKS:
+        added_stocks.append(stock)
+
+print(f'Starting the day holding {held_stocks}') 
+
+if datetime.now().time() < start_time:
+    delete_table('stock_status')
+    delete_table('stock_data')
+
+stock_symbols = CONSTANT_STOCKS + get_top_stocks(8 - len(CONSTANT_STOCKS) - len(added_stocks)) # We give stocks and it fills more in to make 8
+update_stock_database(stock_symbols)
+
+update_macd_database(stocks=stock_symbols)
+macd_crossover = get_macd_crossover_from_database()
 
 while True:
     current_time = datetime.now().time()
@@ -29,7 +44,7 @@ while True:
             # Retrieve historical price data for each stock
             for symbol in stock_symbols:
                 stock = yf.Ticker(symbol)
-                historical_data = stock.history(period=HISTORICAL_PERIOD, interval=INTERVAL)
+                historical_data = stock.history(period=HISTORICAL_PERIOD, interval=INTERVAL, prepost=True)
                 price_history[symbol] = historical_data[['Close']].reset_index().rename(columns={'Datetime': 'Timestamp'})
 
             # Fetch the latest data for each stock
@@ -48,28 +63,30 @@ while True:
                 latest_macd = price_history[symbol]['MACD Line'].iloc[-1]
 
                 price_history[symbol]['Signal Line'] = price_history[symbol]['MACD Line'].ewm(span=EMA_PERIODS[2], adjust=False).mean()
+                latest_signal = price_history[symbol]['Signal Line'].iloc[-1]
 
                 # Check if MACD crossover happened
-                if is_macd_crossover(price_history[symbol]):
+                if is_macd_crossover(price_history, symbol):
+                    update_macd_database(stock=symbol, crossover=True)
                     macd_crossover[symbol] = True
-                
-                # Check if MACD has crossed 0
-                if latest_macd >= 0:
-                    macd_crossed_0[symbol] = True
 
                 # Check if MACD has had a crossover and been greater than 0
-                if macd_crossover[symbol] and macd_crossed_0[symbol]:
-                    if buy(symbol, price_history):
-                        if symbol not in CONSTANT_STOCKS and symbol not in added_stocks:
-                            added_stocks.append(symbol)
-                        print('Buy signal detected for', symbol, '. Executing buy order.')
+                if macd_crossover[symbol]:
+                    print(f'MACD has crossed over the Signal Line for {symbol}.')
+                    if latest_macd > 0 and latest_macd > latest_signal:
+                        if buy(symbol, price_history):
+                            print('Buy signal detected for', symbol, '. Executing buy order.')
+                            if symbol not in CONSTANT_STOCKS and symbol not in added_stocks:
+                                added_stocks.append(symbol)
 
                 # Check if MACD crossunder happened or if MACD < 0 and execute a sell order
-                if is_macd_crossunder(price_history[symbol]) or latest_macd < 0:
+                if is_macd_crossunder(price_history, symbol) or latest_macd < 0:
                     if sell(symbol, price_history):
                         print('Sell signal detected for', symbol, '. Executing sell order.')
-                        macd_crossed_0[symbol] = False
+                        update_macd_database(stock=symbol)
                         macd_crossover[symbol] = False
+                        if symbol in added_stocks:
+                            added_stocks.remove(symbol)
 
                 # Print the latest values
                 latest_macd = price_history[symbol]['MACD Line'].iloc[-1]
@@ -80,15 +97,22 @@ while True:
                 print('Timestamp for', symbol, ':', timestamp)
                 print()
 
-            # Checks top stocks every 10 minutes
+                # Add the information to the database
+                update_stock_data_to_database(symbol, latest_price, latest_macd, latest_signal, timestamp)
+
+            # Checks top stocks every 10 minutes and updates stock database
             if current_time.minute % 10 == 0 and (len(CONSTANT_STOCKS) + len(added_stocks)) < 8:
                 stock_symbols = CONSTANT_STOCKS + added_stocks + get_top_stocks(8 - len(CONSTANT_STOCKS) - len(added_stocks), added_stocks)
+                update_stock_database(stock_symbols)
                 update_macd_dict(macd_crossover, stock_symbols)
-                update_macd_dict(macd_crossed_0, stock_symbols)
+            
+            update_macd_database(stocks=stock_symbols)
+            sleep(60)
 
     # Checks if it is currently past 4 pm
-    else:
+    elif current_time > end_time:
         print('Market has closed')
         print()
+        sort_stock_table()
         break
     

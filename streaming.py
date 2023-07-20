@@ -4,7 +4,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
 import time
-from config import WEBDRIVER_PATH, CONSTANT_STOCKS
+from config import WEBDRIVER_PATH, CONSTANT_STOCKS, EXCLUDED_STOCKS
 
 def get_top_stocks(number_to_look_for:int, excluded_stocks:list=[]) -> list:
     # Configure the webdriver (make sure you have the appropriate driver executable installed)
@@ -13,11 +13,11 @@ def get_top_stocks(number_to_look_for:int, excluded_stocks:list=[]) -> list:
     driver = webdriver.Chrome(options=options)
 
     # Load the Benzinga premarket page
-    driver.get('https://www.benzinga.com/premarket')
+    driver.get('https://stockanalysis.com/markets/gainers/')
 
     # Wait for the Gainers table to load
     time.sleep(2)  # Add a delay to allow the page to load
-    gainers_table = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, '//*[@id="bz-gainers-table"]')))
+    gainers_table = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, '//*[@id="main-table"]')))
     gainers_rows = gainers_table.find_elements(By.XPATH, './/tbody/tr')
 
     # Create a list to store the stock data
@@ -25,7 +25,7 @@ def get_top_stocks(number_to_look_for:int, excluded_stocks:list=[]) -> list:
 
     # Iterate over the Gainers table rows and extract symbol and percent change values
     for row in gainers_rows:
-        symbol = row.find_element(By.XPATH, './td[1]').text
+        symbol = row.find_element(By.XPATH, './td[2]').text
         percent_change = row.find_element(By.XPATH, './td[4]').text
         percent_change = percent_change.strip('%').replace('$', '')  # Remove '%' and '$' characters
         stocks.append({'symbol': symbol, 'percent_change': percent_change})
@@ -38,7 +38,7 @@ def get_top_stocks(number_to_look_for:int, excluded_stocks:list=[]) -> list:
     print(f'Current Top Stocks Based on % Change')
     count = 0
     for stock in sorted_stocks:
-        if stock['symbol'] not in CONSTANT_STOCKS and stock['symbol'] not in excluded_stocks and count < number_to_look_for:
+        if stock['symbol'] not in CONSTANT_STOCKS and stock['symbol'] not in excluded_stocks and count < number_to_look_for and stock['symbol'] not in EXCLUDED_STOCKS:
             print(f"Symbol: {stock['symbol']}, Percent Change: {stock['percent_change']}")
             top_stocks.append(stock['symbol'])
             count += 1
