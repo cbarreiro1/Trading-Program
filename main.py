@@ -27,7 +27,7 @@ if datetime.now().time() < start_time:
     delete_table('stock_status')
     delete_table('stock_data')
 
-stock_symbols = CONSTANT_STOCKS + get_top_stocks(8 - len(CONSTANT_STOCKS) - len(added_stocks)) # We give stocks and it fills more in to make 8
+stock_symbols = CONSTANT_STOCKS + get_top_stocks(8 - len(CONSTANT_STOCKS) - len(added_stocks), excluded_stocks=added_stocks) # We give stocks and it fills more in to make 8
 update_stock_database(stock_symbols)
 
 update_macd_database(stocks=stock_symbols)
@@ -100,7 +100,7 @@ while True:
                 print()
 
                 # Add the information to the database
-                update_stock_data_to_database(symbol, latest_price, latest_macd, latest_signal, timestamp)
+                update_stock_data_to_database(symbol, latest_price, latest_macd, latest_signal, macd_crossover[symbol])
 
             # Checks top stocks every 10 minutes and updates stock database
             if current_time.minute % 10 == 0 and (len(CONSTANT_STOCKS) + len(added_stocks)) < 8:

@@ -4,12 +4,12 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
 import time
-from config import WEBDRIVER_PATH, CONSTANT_STOCKS, EXCLUDED_STOCKS
+from config import WEBDRIVER_PATH, CONSTANT_STOCKS, EXCLUDED_STOCKS, CODE_RUNNER
 
 def get_top_stocks(number_to_look_for:int, excluded_stocks:list=[]) -> list:
     # Configure the webdriver (make sure you have the appropriate driver executable installed)
     options = Options()
-    options.add_argument(WEBDRIVER_PATH)
+    options.add_argument(WEBDRIVER_PATH[CODE_RUNNER])
     driver = webdriver.Chrome(options=options)
 
     # Load the Benzinga premarket page

@@ -1,10 +1,10 @@
 import alpaca_trade_api as tradeapi
-from config import APCA_API_BASE_URL, APCA_API_KEY_ID, APCA_API_SECRET_KEY
+from config import APCA_API_BASE_URL, APCA_API_KEY_ID, APCA_API_SECRET_KEY, CODE_RUNNER
 import pandas as pd
 from message import send_text
 
 # Initialize the Alpaca API client
-api = tradeapi.REST(APCA_API_KEY_ID, APCA_API_SECRET_KEY, APCA_API_BASE_URL, api_version='v2')
+api = tradeapi.REST(APCA_API_KEY_ID[CODE_RUNNER], APCA_API_SECRET_KEY[CODE_RUNNER], APCA_API_BASE_URL, api_version='v2')
 
 def get_shares(symbol:str) -> float:
     # Retrieve your account's positions
