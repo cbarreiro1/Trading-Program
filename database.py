@@ -1,18 +1,19 @@
 import sqlite3
 from datetime import datetime
 
-def update_stock_data_to_database(symbol, latest_price, latest_macd, latest_signal, timestamp):
+def update_stock_data_to_database(symbol: str, latest_price: float, latest_macd, latest_signal, macd_crossover: bool):
     conn = sqlite3.connect('database.db')
     cursor = conn.cursor()
+    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
     # Create the stock_data table if it doesn't already exist
-    cursor.execute('''CREATE TABLE IF NOT EXISTS stock_data
+    cursor.execute('''CREATE TABLE IF NOT EXISTS stock_datas
                       (symbol TEXT, latest_price REAL, latest_macd REAL,
-                       latest_signal REAL, timestamp TIMESTAMP,
+                       latest_signal REAL, macd_crossover BOOLEAN, timestamp TEXT,
                        PRIMARY KEY (symbol, timestamp))''')
 
-    cursor.execute('''INSERT INTO stock_data (symbol, latest_price, latest_macd, latest_signal, timestamp)
-                      VALUES (?, ?, ?, ?, ?)''', (symbol, latest_price, latest_macd, latest_signal, timestamp))
+    cursor.execute('''INSERT INTO stock_data (symbol, latest_price, latest_macd, latest_signal, macd_crossover, timestamp)
+                      VALUES (?, ?, ?, ?, ?, ?)''', (symbol, latest_price, latest_macd, latest_signal, macd_crossover, timestamp))
 
     conn.commit()
     conn.close()
@@ -46,7 +47,7 @@ def sort_stock_data_table():
 
     conn.close()
 
-def update_stock_database(stock_symbols):
+def update_stock_database(stock_symbols:list):
     conn = sqlite3.connect('database.db')
     cursor = conn.cursor()
 

@@ -20,7 +20,7 @@ def update_macd_dict(macd_dict:dict, stocks:list):
         if key in macd_dict.keys():
             del macd_dict[key]
 
-CONSTANT_STOCKS = ['SMX', 'CVNA', 'SXTP', 'PBLA', 'VRM']
+CONSTANT_STOCKS = ['GRRR', 'TTOO', 'LYT', 'PRFX', 'KTTA']
 EXCLUDED_STOCKS = []
 EMA_PERIODS = [12, 26, 9]
 INTERVAL = '5m'  # Interval for price data
@@ -29,8 +29,14 @@ BASE_URL = 'https://paper-api.alpaca.markets'  # Paper trading API base URL
 
 # Alpaca API credentials
 APCA_API_BASE_URL = 'https://paper-api.alpaca.markets'
-APCA_API_KEY_ID = 'PKD2SNVTL4MK3CWY0Z3F'
-APCA_API_SECRET_KEY = 'ImchqiPGdvb2PKXNaxZhIKIjbEpnuiauTl1R0eVl'
+APCA_API_KEY_ID = {'CJ': 'PKD2SNVTL4MK3CWY0Z3F',
+                   'Durston': ''}
+APCA_API_SECRET_KEY = {'CJ': 'ImchqiPGdvb2PKXNaxZhIKIjbEpnuiauTl1R0eVl',
+                       'Durston': ''}
 
 # Webdriver path on local machine
-WEBDRIVER_PATH = 'C:\\Users\\cjgat\\Downloads\\chromedriver_win32\\chromedriver.exe'
+WEBDRIVER_PATH = {'CJ': 'C:\\Users\\cjgat\\Downloads\\chromedriver_win32\\chromedriver.exe',
+                  'Durston': ''}
+
+# Person running the code
+CODE_RUNNER = 'CJ'
