@@ -6,6 +6,7 @@ from selenium.webdriver.chrome.options import Options
 import time
 from config import WEBDRIVER_PATH, CONSTANT_STOCKS, EXCLUDED_STOCKS, CODE_RUNNER
 
+# Given a certain number of stocks to look for and stocks to exclude from the list, it searched for the top stocks based on % Change
 def get_top_stocks(number_to_look_for:int, excluded_stocks:list=[]) -> list:
     # Configure the webdriver (make sure you have the appropriate driver executable installed)
     options = Options()

@@ -1,5 +1,6 @@
 import smtplib
 
+# Sends a given message as a text
 def send_text(message:str):
     # Email information
     SMTP_SERVER = 'smtp.gmail.com'

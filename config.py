@@ -39,4 +39,4 @@ WEBDRIVER_PATH = {'CJ': 'C:\\Users\\cjgat\\Downloads\\chromedriver_win32\\chrome
                   'Durston': 'C:\\Users\\durst\\Downloads\\chromedriver.exe'}
 
 # Person running the code
-CODE_RUNNER = 'Durston'
+CODE_RUNNER = 'CJ'

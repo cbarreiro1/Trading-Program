@@ -23,12 +23,12 @@ for stock in held_stocks:
 
 print(f'Starting the day holding {held_stocks}') 
 
+# If it's earlier than 9:30 am
 if datetime.now().time() < start_time:
-    delete_table('stock_status')
-    delete_table('stock_data')
+    delete_all_tables_in_database('database.db')
 
-stock_symbols = CONSTANT_STOCKS + get_top_stocks(8 - len(CONSTANT_STOCKS) - len(added_stocks), excluded_stocks=added_stocks) # We give stocks and it fills more in to make 8
-update_stock_database(stock_symbols)
+# Searches for top stocks not in the constant list and adds them to search for 8 stocks at once
+stock_symbols = CONSTANT_STOCKS + get_top_stocks(8 - len(CONSTANT_STOCKS) - len(added_stocks), excluded_stocks=added_stocks)
 
 update_macd_database(stocks=stock_symbols)
 macd_crossover = get_macd_crossover_from_database()
@@ -51,61 +51,69 @@ while True:
 
             # Fetch the latest data for each stock
             for symbol in stock_symbols:
-                stock_data = yf.download(symbol, period='7d', interval=INTERVAL)
-                latest_price = stock_data['Close'][-1]
-                timestamp = stock_data.index[-1]
+                try:
+                    stock_data = yf.download(symbol, period='7d', interval=INTERVAL)
+                    latest_price = stock_data['Close'][-1]
+                    timestamp = stock_data.index[-1]
 
-                # Append the latest price to the price history dataframe
-                price_history[symbol] = pd.concat([price_history[symbol], pd.DataFrame({'Timestamp': [timestamp], 'Close': [latest_price]})],
-                                                ignore_index=True)
+                    # Append the latest price to the price history dataframe
+                    price_history[symbol] = pd.concat([price_history[symbol], pd.DataFrame({'Timestamp': [timestamp], 'Close': [latest_price]})],
+                                                    ignore_index=True)
 
-                # Calculate MACD line and signal line
-                price_history[symbol]['MACD Line'] = price_history[symbol]['Close'].ewm(span=EMA_PERIODS[0], adjust=False).mean() - \
-                                                    price_history[symbol]['Close'].ewm(span=EMA_PERIODS[1], adjust=False).mean()
-                latest_macd = price_history[symbol]['MACD Line'].iloc[-1]
+                    # Append the latest price to the price history dataframe
+                    price_history[symbol] = pd.concat([price_history[symbol], pd.DataFrame({'Timestamp': [timestamp], 'Close': [latest_price]})],
+                                                    ignore_index=True)
 
-                price_history[symbol]['Signal Line'] = price_history[symbol]['MACD Line'].ewm(span=EMA_PERIODS[2], adjust=False).mean()
-                latest_signal = price_history[symbol]['Signal Line'].iloc[-1]
+                    # Calculate MACD line and signal line
+                    price_history[symbol]['MACD Line'] = price_history[symbol]['Close'].ewm(span=EMA_PERIODS[0], adjust=False).mean() - \
+                                                        price_history[symbol]['Close'].ewm(span=EMA_PERIODS[1], adjust=False).mean()
+                    latest_macd = price_history[symbol]['MACD Line'].iloc[-1]
 
-                # Check if MACD crossover happened
-                if is_macd_crossover(price_history, symbol):
-                    update_macd_database(stock=symbol, crossover=True)
-                    macd_crossover[symbol] = True
+                    price_history[symbol]['Signal Line'] = price_history[symbol]['MACD Line'].ewm(span=EMA_PERIODS[2], adjust=False).mean()
+                    latest_signal = price_history[symbol]['Signal Line'].iloc[-1]
 
-                # Check if MACD has had a crossover and been greater than 0
-                if macd_crossover[symbol]:
-                    print(f'MACD has crossed over the Signal Line for {symbol}.')
-                    if latest_macd > 0 and latest_macd > latest_signal:
-                        if buy(symbol, price_history):
-                            print('Buy signal detected for', symbol, '. Executing buy order.')
-                            if symbol not in CONSTANT_STOCKS and symbol not in added_stocks:
-                                added_stocks.append(symbol)
+                    # Check if MACD crossover happened
+                    if is_macd_crossover(price_history, symbol):
+                        update_macd_database(stock=symbol, crossover=True)
+                        macd_crossover[symbol] = True
 
-                # Check if MACD crossunder happened or if MACD < 0 and execute a sell order
-                if is_macd_crossunder(price_history, symbol) or latest_macd < 0:
-                    if sell(symbol, price_history):
-                        print('Sell signal detected for', symbol, '. Executing sell order.')
-                        update_macd_database(stock=symbol)
-                        macd_crossover[symbol] = False
-                        if symbol in added_stocks:
-                            added_stocks.remove(symbol)
+                    # Check if MACD has had a crossover and been greater than 0
+                    if macd_crossover[symbol]:
+                        print(f'MACD has crossed over the Signal Line for {symbol}.')
+                        if latest_macd > 0 and latest_macd > latest_signal:
+                            if buy(symbol, price_history):
+                                print('Buy signal detected for', symbol, '. Executing buy order.')
+                                if symbol not in CONSTANT_STOCKS and symbol not in added_stocks:
+                                    added_stocks.append(symbol)
 
-                # Print the latest values
-                latest_macd = price_history[symbol]['MACD Line'].iloc[-1]
-                latest_signal = price_history[symbol]['Signal Line'].iloc[-1]
-                print('Latest Price for', symbol, ':', latest_price)
-                print('MACD Line for', symbol, ':', latest_macd)
-                print('Signal Line for', symbol, ':', latest_signal)
-                print('Timestamp for', symbol, ':', timestamp)
-                print()
+                    # Check if MACD crossunder happened or if MACD < 0 and execute a sell order
+                    if is_macd_crossunder(price_history, symbol) or latest_macd < 0:
+                        if sell(symbol, price_history):
+                            print('Sell signal detected for', symbol, '. Executing sell order.')
+                            update_macd_database(stock=symbol)
+                            macd_crossover[symbol] = False
+                            if symbol in added_stocks:
+                                added_stocks.remove(symbol)
 
-                # Add the information to the database
-                update_stock_data_to_database(symbol, latest_price, latest_macd, latest_signal, macd_crossover[symbol])
+                    # Print the latest values
+                    latest_macd = price_history[symbol]['MACD Line'].iloc[-1]
+                    latest_signal = price_history[symbol]['Signal Line'].iloc[-1]
+                    print('Latest Price for', symbol, ':', latest_price)
+                    print('MACD Line for', symbol, ':', latest_macd)
+                    print('Signal Line for', symbol, ':', latest_signal)
+                    print('Timestamp for', symbol, ':', timestamp)
+                    print()
+
+                    # Add the information to the database
+                    update_stock_data_table(symbol, latest_price, latest_macd, latest_signal, macd_crossover[symbol])
+
+                except Exception as e:
+                    # Handle the exception (e.g., stock data not available)
+                    print(f"Failed download: [{symbol}]: {e}")
 
             # Checks top stocks every 10 minutes and updates stock database
             if current_time.minute % 10 == 0 and (len(CONSTANT_STOCKS) + len(added_stocks)) < 8:
                 stock_symbols = CONSTANT_STOCKS + added_stocks + get_top_stocks(8 - len(CONSTANT_STOCKS) - len(added_stocks), added_stocks)
-                update_stock_database(stock_symbols)
                 update_macd_dict(macd_crossover, stock_symbols)
             
             update_macd_database(stocks=stock_symbols)
@@ -115,7 +123,5 @@ while True:
     elif current_time > end_time:
         print('Market has closed')
         print()
-        sort_stock_status_table()
-        sort_stock_data_table()
         break
     
