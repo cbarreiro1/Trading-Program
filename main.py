@@ -72,6 +72,20 @@ while True:
                     price_history[symbol]['Signal Line'] = price_history[symbol]['MACD Line'].ewm(span=EMA_PERIODS[2], adjust=False).mean()
                     latest_signal = price_history[symbol]['Signal Line'].iloc[-1]
 
+                    # Check if MACD crossunder happened or if MACD < 0 and execute a sell order
+                    if is_macd_crossunder_signal(price_history, symbol):
+                        update_macd_database(stock=symbol)
+                        macd_crossover[symbol] = False # resets crossover to false if macd crosses under the signal line
+                        if sell(symbol, price_history):
+                            print('Sell signal detected for', symbol, '. Executing sell order.')
+                            if symbol in added_stocks:
+                                added_stocks.remove(symbol)
+                    elif is_macd_crossunder_0(price_history, symbol):
+                        if sell(symbol, price_history):
+                            print('Sell signal detected for', symbol, '. Executing sell order.')
+                            if symbol in added_stocks:
+                                added_stocks.remove(symbol)
+
                     # Check if MACD crossover happened
                     if is_macd_crossover(price_history, symbol):
                         update_macd_database(stock=symbol, crossover=True)
@@ -85,15 +99,6 @@ while True:
                                 print('Buy signal detected for', symbol, '. Executing buy order.')
                                 if symbol not in CONSTANT_STOCKS and symbol not in added_stocks:
                                     added_stocks.append(symbol)
-
-                    # Check if MACD crossunder happened or if MACD < 0 and execute a sell order
-                    if is_macd_crossunder(price_history, symbol) or latest_macd < 0:
-                        if sell(symbol, price_history):
-                            print('Sell signal detected for', symbol, '. Executing sell order.')
-                            update_macd_database(stock=symbol)
-                            macd_crossover[symbol] = False
-                            if symbol in added_stocks:
-                                added_stocks.remove(symbol)
 
                     # Print the latest values
                     latest_macd = price_history[symbol]['MACD Line'].iloc[-1]
