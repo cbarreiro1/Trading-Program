@@ -1,8 +1,10 @@
 import sqlite3
 from datetime import datetime
 
-# Adds given stock data to it's own table
-def update_stock_data_table(symbol:str, latest_price:float, latest_macd:float, latest_signal:float, macd_crossover:bool):
+# Adds given stock data to its own table
+def update_stock_data_table(symbol:str, latest_price:float, latest_macd:float, latest_signal:float, macd_crossover:bool,
+                            macd_line_over_signal:bool, macd_line_over_zero:bool, macd_crossed_over_signal:bool, 
+                            macd_crossed_over_zero:bool):
     conn = sqlite3.connect('database.db')
     cursor = conn.cursor()
 
@@ -10,17 +12,23 @@ def update_stock_data_table(symbol:str, latest_price:float, latest_macd:float, l
     table_name = f'stock_{symbol}'
     cursor.execute(f'''CREATE TABLE IF NOT EXISTS {table_name}
                       (latest_price REAL, latest_macd REAL,
-                       latest_signal REAL, macd_crossover BOOLEAN, timestamp TEXT,
-                       PRIMARY KEY (timestamp))''')
+                       latest_signal REAL, macd_crossover BOOLEAN, macd_line_over_signal BOOLEAN,
+                       macd_line_over_zero BOOLEAN, macd_crossed_over_signal BOOLEAN, macd_crossed_over_zero BOOLEAN,
+                       timestamp TEXT, PRIMARY KEY (timestamp))''')
 
     timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
     # Insert the provided data along with the current timestamp
-    cursor.execute(f'''INSERT INTO {table_name} (latest_price, latest_macd, latest_signal, macd_crossover, timestamp)
-                      VALUES (?, ?, ?, ?, ?)''', (latest_price, latest_macd, latest_signal, macd_crossover, timestamp))
+    cursor.execute(f'''INSERT INTO {table_name} (latest_price, latest_macd, latest_signal, macd_crossover,
+                      macd_line_over_signal, macd_line_over_zero, macd_crossed_over_signal, macd_crossed_over_zero,
+                      timestamp)
+                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)''', (latest_price, latest_macd, latest_signal, macd_crossover,
+                                                            macd_line_over_signal, macd_line_over_zero,
+                                                            macd_crossed_over_signal, macd_crossed_over_zero, timestamp))
 
     conn.commit()
     conn.close()
+
 
 # Deletes every table in a given database
 def delete_all_tables_in_database(database_name:str):
@@ -38,6 +46,9 @@ def delete_all_tables_in_database(database_name:str):
 
     conn.commit()
     conn.close()
+
+# Now, you can call the functions appropriately when you need them.
+
 
 # Updates the if the MACD has crossed over for the stocks being searched for
 def update_macd_database(stocks:list=None, stock:str=None, crossover:bool=False):

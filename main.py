@@ -72,33 +72,32 @@ while True:
                     price_history[symbol]['Signal Line'] = price_history[symbol]['MACD Line'].ewm(span=EMA_PERIODS[2], adjust=False).mean()
                     latest_signal = price_history[symbol]['Signal Line'].iloc[-1]
 
-                    # Check if MACD crossunder happened or if MACD < 0 and execute a sell order
-                    if is_macd_crossunder_signal(price_history, symbol):
-                        update_macd_database(stock=symbol)
-                        macd_crossover[symbol] = False # resets crossover to false if macd crosses under the signal line
-                        if sell(symbol, price_history):
-                            print('Sell signal detected for', symbol, '. Executing sell order.')
-                            if symbol in added_stocks:
-                                added_stocks.remove(symbol)
-                    elif is_macd_crossunder_0(price_history, symbol):
-                        if sell(symbol, price_history):
-                            print('Sell signal detected for', symbol, '. Executing sell order.')
-                            if symbol in added_stocks:
-                                added_stocks.remove(symbol)
+                    #Defines True or False
+                    macd_over_signal = False
+                    macd_over_zero = False
+                    macd_crossed_over_signal = False
+                    macd_crossed_over_zero = False
+                    
+                    #Stores data for each stock
+                    macd_over_signal = is_macd_line_over_signal(price_history, symbol)
+                    macd_over_zero = is_macd_line_over_zero(price_history, symbol)
+                    macd_crossed_over_signal = has_macd_crossed_over_signal(price_history, symbol)
+                    macd_crossed_over_zero = has_macd_crossed_over_zero(price_history, symbol)
 
-                    # Check if MACD crossover happened
-                    if is_macd_crossover(price_history, symbol):
-                        update_macd_database(stock=symbol, crossover=True)
-                        macd_crossover[symbol] = True
-
-                    # Check if MACD has had a crossover and been greater than 0
-                    if macd_crossover[symbol]:
-                        print(f'MACD has crossed over the Signal Line for {symbol}.')
-                        if latest_macd > 0 and latest_macd > latest_signal:
-                            if buy(symbol, price_history):
-                                print('Buy signal detected for', symbol, '. Executing buy order.')
-                                if symbol not in CONSTANT_STOCKS and symbol not in added_stocks:
-                                    added_stocks.append(symbol)
+                    # Check if the stock meets the criteria to buy or sell
+                    true_count = sum([macd_over_signal, macd_over_zero, macd_crossed_over_signal, macd_crossed_over_zero])
+                    if true_count >= 3:
+                         if buy(symbol, price_history):
+                          print('Buy signal detected for', symbol, '. Executing buy order.')
+                         if symbol not in CONSTANT_STOCKS and symbol not in added_stocks:
+                           added_stocks.append(symbol)
+                    else:  # Otherwise, sell the stock only if it has 3 false values
+                         false_count = 4 - true_count
+                         if false_count >= 3:
+                            if sell(symbol, price_history):
+                               print('Sell signal detected for', symbol, '. Executing sell order.')
+                               if symbol in added_stocks:
+                                  added_stocks.remove(symbol)
 
                     # Print the latest values
                     latest_macd = price_history[symbol]['MACD Line'].iloc[-1]
@@ -106,11 +105,15 @@ while True:
                     print('Latest Price for', symbol, ':', latest_price)
                     print('MACD Line for', symbol, ':', latest_macd)
                     print('Signal Line for', symbol, ':', latest_signal)
+                    print('MACD Over Signal:', macd_over_signal)
+                    print('MACD Over Zero:', macd_over_zero)
+                    print('MACD Crossover Signal:', macd_crossed_over_signal)
+                    print('MACD Crossover Zero:', macd_crossed_over_zero)
                     print('Timestamp for', symbol, ':', timestamp)
                     print()
 
                     # Add the information to the database
-                    update_stock_data_table(symbol, latest_price, latest_macd, latest_signal, macd_crossover[symbol])
+                    update_stock_data_table(symbol, latest_price, latest_macd, latest_signal, macd_crossover[symbol], macd_over_signal, macd_over_zero, macd_crossed_over_signal, macd_crossed_over_zero)
 
                 except Exception as e:
                     # Handle the exception (e.g., stock data not available)
