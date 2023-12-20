@@ -5,7 +5,7 @@ from streaming import get_top_stocks
 from datetime import datetime, time
 from strategies import *
 from alpaca_trading import buy, sell, get_held_stocks
-from config import CONSTANT_STOCKS, INTERVAL, HISTORICAL_PERIOD, EMA_PERIODS, create_stock_bool_dict, update_macd_dict
+from config import CONSTANT_STOCKS, INTERVAL, HISTORICAL_PERIOD, EMA_PERIODS, NUMBER_OF_STOCKS, update_macd_dict
 from database import *
 
 # Set the start and end time for the loop
@@ -27,8 +27,8 @@ print(f'Starting the day holding {held_stocks}')
 if datetime.now().time() < start_time:
     delete_all_tables_in_database('database.db')
 
-# Searches for top stocks not in the constant list and adds them to search for 8 stocks at once
-stock_symbols = CONSTANT_STOCKS + get_top_stocks(8 - len(CONSTANT_STOCKS) - len(added_stocks), excluded_stocks=added_stocks)
+# Searches for top stocks not in the constant list and adds them to search for  a number of stocks stocks at once
+stock_symbols = CONSTANT_STOCKS + get_top_stocks(NUMBER_OF_STOCKS - len(CONSTANT_STOCKS) - len(added_stocks), excluded_stocks=added_stocks)
 
 update_macd_database(stocks=stock_symbols)
 macd_crossover = get_macd_crossover_from_database()
@@ -120,8 +120,8 @@ while True:
                     print(f"Failed download: [{symbol}]: {e}")
 
             # Checks top stocks every 10 minutes and updates stock database
-            if current_time.minute % 10 == 0 and (len(CONSTANT_STOCKS) + len(added_stocks)) < 8:
-                stock_symbols = CONSTANT_STOCKS + added_stocks + get_top_stocks(8 - len(CONSTANT_STOCKS) - len(added_stocks), added_stocks)
+            if current_time.minute % 10 == 0 and (len(CONSTANT_STOCKS) + len(added_stocks)) < NUMBER_OF_STOCKS:
+                stock_symbols = CONSTANT_STOCKS + added_stocks + get_top_stocks(NUMBER_OF_STOCKS - len(CONSTANT_STOCKS) - len(added_stocks), added_stocks)
                 update_macd_dict(macd_crossover, stock_symbols)
             
             update_macd_database(stocks=stock_symbols)

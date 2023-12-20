@@ -20,7 +20,9 @@ def update_macd_dict(macd_dict:dict, stocks:list):
         if key in macd_dict.keys():
             del macd_dict[key]
 
-CONSTANT_STOCKS = ['DCTH', 'GRND','TLSA', 'EVOK', 'EDBL']
+# Set up variables before running
+CONSTANT_STOCKS = []
+NUMBER_OF_STOCKS = 5
 EXCLUDED_STOCKS = []
 EMA_PERIODS = [12, 26, 9]
 INTERVAL = '5m'  # Interval for price data
