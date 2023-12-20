@@ -28,7 +28,7 @@ if datetime.now().time() < start_time:
     delete_all_tables_in_database('database.db')
 
 # Searches for top stocks not in the constant list and adds them to search for  a number of stocks stocks at once
-stock_symbols = CONSTANT_STOCKS + get_top_stocks(NUMBER_OF_STOCKS - len(CONSTANT_STOCKS) - len(added_stocks), excluded_stocks=added_stocks)
+stock_symbols = CONSTANT_STOCKS + get_top_stocks(NUMBER_OF_STOCKS - len(CONSTANT_STOCKS) - len(added_stocks), excluded_stocks=added_stocks) + get_held_stocks()
 
 update_macd_database(stocks=stock_symbols)
 macd_crossover = get_macd_crossover_from_database()
@@ -52,9 +52,9 @@ while True:
             # Fetch the latest data for each stock
             for symbol in stock_symbols:
                 try:
-                    stock_data = yf.download(symbol, period='7d', interval=INTERVAL)
+                    stock_data = yf.download(symbol, period='60d', interval=INTERVAL)
                     latest_price = stock_data['Close'][-1]
-                    timestamp = stock_data.index[-1]
+                    timestamp = current_time
 
                     # Append the latest price to the price history dataframe
                     price_history[symbol] = pd.concat([price_history[symbol], pd.DataFrame({'Timestamp': [timestamp], 'Close': [latest_price]})],

@@ -26,7 +26,7 @@ NUMBER_OF_STOCKS = 5
 EXCLUDED_STOCKS = []
 EMA_PERIODS = [12, 26, 9]
 INTERVAL = '5m'  # Interval for price data
-HISTORICAL_PERIOD = '7d'
+HISTORICAL_PERIOD = '60d'
 BASE_URL = 'https://paper-api.alpaca.markets'  # Paper trading API base URL
 
 # Alpaca API credentials
