@@ -21,9 +21,9 @@ def update_macd_dict(macd_dict:dict, stocks:list):
             del macd_dict[key]
 
 # Set up variables before running
-CONSTANT_STOCKS = []
+CONSTANT_STOCKS = ['GOOG', 'TSLA']
 NUMBER_OF_STOCKS = 5
-EXCLUDED_STOCKS = []
+EXCLUDED_STOCKS = ['RYZB', 'CLBR']
 EMA_PERIODS = [12, 26, 9]
 INTERVAL = '5m'  # Interval for price data
 HISTORICAL_PERIOD = '60d'

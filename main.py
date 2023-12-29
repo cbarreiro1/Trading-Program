@@ -33,6 +33,10 @@ stock_symbols = CONSTANT_STOCKS + get_top_stocks(NUMBER_OF_STOCKS - len(CONSTANT
 update_macd_database(stocks=stock_symbols)
 macd_crossover = get_macd_crossover_from_database()
 
+# Create dictionaries to store MACD-related information for each stock
+signal_dict = {symbol: [] for symbol in stock_symbols}
+zero_dict = {symbol: [] for symbol in stock_symbols}
+
 while True:
     current_time = datetime.now().time()
 
@@ -72,6 +76,11 @@ while True:
                     price_history[symbol]['Signal Line'] = price_history[symbol]['MACD Line'].ewm(span=EMA_PERIODS[2], adjust=False).mean()
                     latest_signal = price_history[symbol]['Signal Line'].iloc[-1]
 
+                    # Add the symbol to the dictionaries if it's a new stock being searched for
+                    if symbol not in signal_dict:
+                        signal_dict[symbol] = []
+                        zero_dict[symbol] = []
+
                     #Defines True or False
                     macd_over_signal = False
                     macd_over_zero = False
@@ -81,8 +90,13 @@ while True:
                     #Stores data for each stock
                     macd_over_signal = is_macd_line_over_signal(price_history, symbol)
                     macd_over_zero = is_macd_line_over_zero(price_history, symbol)
-                    macd_crossed_over_signal = has_macd_crossed_over_signal(price_history, symbol)
-                    macd_crossed_over_zero = has_macd_crossed_over_zero(price_history, symbol)
+                    # macd_crossed_over_signal = has_macd_crossed_over_signal(price_history, symbol)
+                    # macd_crossed_over_zero = has_macd_crossed_over_zero(price_history, symbol)
+                    signal_dict[symbol].append(macd_over_signal)
+                    zero_dict[symbol].append(macd_over_zero)
+                    if (len(signal_dict[symbol]) >= 2 and len(zero_dict[symbol]) >= 2):
+                        macd_crossed_over_signal = has_macd_crossed_over_signal(signal_dict[symbol])
+                        macd_crossed_over_zero = has_macd_crossed_over_zero(zero_dict[symbol])
 
                     # Check if the stock meets the criteria to buy or sell
                     true_count = sum([macd_over_signal, macd_over_zero, macd_crossed_over_signal, macd_crossed_over_zero])
@@ -117,7 +131,7 @@ while True:
 
                 except Exception as e:
                     # Handle the exception (e.g., stock data not available)
-                    print(f"Failed download: [{symbol}]: {e}")
+                    print(f"Failed download: {symbol}: {e}")
 
             # Checks top stocks every 10 minutes and updates stock database
             if current_time.minute % 10 == 0 and (len(CONSTANT_STOCKS) + len(added_stocks)) < NUMBER_OF_STOCKS:
