@@ -21,8 +21,8 @@ def update_macd_dict(macd_dict:dict, stocks:list):
             del macd_dict[key]
 
 # Set up variables before running
-CONSTANT_STOCKS = ['GOOG', 'TSLA']
-NUMBER_OF_STOCKS = 5
+CONSTANT_STOCKS = ['NEXI', 'SASI', 'ABVC', 'SIDU',]
+NUMBER_OF_STOCKS = 6
 EXCLUDED_STOCKS = ['RYZB', 'CLBR']
 EMA_PERIODS = [12, 26, 9]
 INTERVAL = '5m'  # Interval for price data
@@ -32,13 +32,13 @@ BASE_URL = 'https://paper-api.alpaca.markets'  # Paper trading API base URL
 # Alpaca API credentials
 APCA_API_BASE_URL = 'https://paper-api.alpaca.markets'
 APCA_API_KEY_ID = {'CJ': 'PKHNW562AA4FC6BQ9Y0L',
-                   'Durston': 'PKOR8QF0GDGHFGVF3RJR'}
+                   'Durston': 'PK9V612CH7UOKI1B6YIC'}
 APCA_API_SECRET_KEY = {'CJ': 'aOeNOqIG9ortGxsyxqcpY1rmbk7ZpaftkxGyKzXv',
-                       'Durston': 'JlLhjnk4bLJ22fytVMrXffTWcUE47ibcKKuDdfHB'}
+                       'Durston': 'TVvBcEeYAfWqaVi9QC3Joa4lxzm00oo2AtoOvxKd'}
 
 # Webdriver path on local machine
 WEBDRIVER_PATH = {'CJ': 'C:\\Users\\cjgat\\Downloads\\chromedriver_win32\\chromedriver.exe',
                   'Durston': 'C:\\Users\\durst\\Downloads\\chromedriver.exe'}
 
 # Person running the code
-CODE_RUNNER = 'CJ'
+CODE_RUNNER = 'Durston'

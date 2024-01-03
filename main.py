@@ -37,6 +37,7 @@ macd_crossover = get_macd_crossover_from_database()
 signal_dict = {symbol: [] for symbol in stock_symbols}
 zero_dict = {symbol: [] for symbol in stock_symbols}
 
+
 while True:
     current_time = datetime.now().time()
 
@@ -46,6 +47,7 @@ while True:
         if current_time.minute % 5 == 0:
             # Create a dictionary to store the price history for each stock
             price_history = {}
+                 
 
             # Retrieve historical price data for each stock
             for symbol in stock_symbols:
@@ -97,6 +99,8 @@ while True:
                     if (len(signal_dict[symbol]) >= 2 and len(zero_dict[symbol]) >= 2):
                         macd_crossed_over_signal = has_macd_crossed_over_signal(signal_dict[symbol])
                         macd_crossed_over_zero = has_macd_crossed_over_zero(zero_dict[symbol])
+                        
+ 
 
                     # Check if the stock meets the criteria to buy or sell
                     true_count = sum([macd_over_signal, macd_over_zero, macd_crossed_over_signal, macd_crossed_over_zero])
