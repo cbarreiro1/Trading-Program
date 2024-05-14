@@ -28,7 +28,7 @@ def buy(symbol:str, price_history:dict) -> bool:
     
     # Get account information
     account = api.get_account()
-    equity = float(account.equity) * 0.1  # 10% of equity in account
+    equity = float(account.equity) * 0.33  # 10% of equity in account
 
     latest_price = price_history[symbol]['Close'].iloc[-1]  # Get the latest price for the symbol
 
