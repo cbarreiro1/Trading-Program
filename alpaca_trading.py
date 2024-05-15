@@ -2,6 +2,9 @@ import alpaca_trade_api as tradeapi
 from config import APCA_API_BASE_URL, APCA_API_KEY_ID, APCA_API_SECRET_KEY, CODE_RUNNER
 import pandas as pd
 from message import send_text
+from config import Max_Trade_Count
+
+trade_count=0
 
 # Initialize the Alpaca API client
 api = tradeapi.REST(APCA_API_KEY_ID[CODE_RUNNER], APCA_API_SECRET_KEY[CODE_RUNNER], APCA_API_BASE_URL, api_version='v2')
@@ -39,6 +42,11 @@ def buy(symbol:str, price_history:dict) -> bool:
     if quantity == 0:
         print('Skipping buy order. Not enough equity to buy a full share.')
         return False
+    
+    #Check PDT Rule
+    if trade_count >= Max_Trade_Count
+       print('Skipping buy order PDT Rule')
+       return False
 
     api.submit_order(
         symbol=symbol,

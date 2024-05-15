@@ -4,9 +4,10 @@ from time import sleep
 from streaming import get_top_stocks
 from datetime import datetime, time
 from strategies import *
-from alpaca_trading import buy, sell, get_held_stocks
+from alpaca_trading import buy, sell, get_held_stocks, trade_count
 from config import CONSTANT_STOCKS, INTERVAL, HISTORICAL_PERIOD, EMA_PERIODS, NUMBER_OF_STOCKS, update_macd_dict
 from database import *
+
 
 # Set the start and end time for the loop
 start_time = time(9, 30)  # 9:30 am
@@ -22,6 +23,7 @@ for stock in held_stocks:
         added_stocks.append(stock)
 
 print(f'Starting the day holding {held_stocks}') 
+
 
 # If it's earlier than 9:30 am
 if datetime.now().time() < start_time:
@@ -43,8 +45,11 @@ while True:
 
     # Check if the current time is between 9:30 am and 4 pm
     if current_time >= start_time and current_time <= end_time:
+      
+
         # Check if the current minute is divisible by 5
         if current_time.minute % 5 == 0:
+            
             # Create a dictionary to store the price history for each stock
             price_history = {}
                  
@@ -107,6 +112,7 @@ while True:
                     if true_count >= 3:
                          if buy(symbol, price_history):
                           print('Buy signal detected for', symbol, '. Executing buy order.')
+                          trade_count += 1
                          if symbol not in CONSTANT_STOCKS and symbol not in added_stocks:
                            added_stocks.append(symbol)
                     else:  # Otherwise, sell the stock only if it has 3 false values
@@ -128,7 +134,7 @@ while True:
                     print('MACD Crossover Signal:', macd_crossed_over_signal)
                     print('MACD Crossover Zero:', macd_crossed_over_zero)
                     print('Timestamp for', symbol, ':', timestamp)
-                    print()
+                    print('Trade Count', symbol, ':', trade_count)
 
                     # Add the information to the database
                     update_stock_data_table(symbol, latest_price, latest_macd, latest_signal, macd_crossover[symbol], macd_over_signal, macd_over_zero, macd_crossed_over_signal, macd_crossed_over_zero)
