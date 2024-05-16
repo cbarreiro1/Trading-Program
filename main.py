@@ -4,7 +4,7 @@ from time import sleep
 from streaming import get_top_stocks
 from datetime import datetime, time
 from strategies import *
-from alpaca_trading import buy, sell, get_held_stocks, trade_count
+from alpaca_trading import buy, sell, get_held_stocks, trade_count, sell_all_positions_before_market_close
 from config import CONSTANT_STOCKS, INTERVAL, HISTORICAL_PERIOD, EMA_PERIODS, NUMBER_OF_STOCKS, update_macd_dict
 from database import *
 
@@ -150,6 +150,9 @@ while True:
             
             update_macd_database(stocks=stock_symbols)
             sleep(60)
+
+    # Check if it's 3:55 PM to sell all open positions
+        sell_all_positions_before_market_close()
 
     # Checks if it is currently past 4 pm
     elif current_time > end_time:
