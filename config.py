@@ -30,7 +30,7 @@ HISTORICAL_PERIOD = '60d'
 BASE_URL = 'https://paper-api.alpaca.markets'  # Paper trading API base URL
 
 #PDT Trade Count
-Max_Trade_Count=3
+Max_Trade_Count = 3
 
 # Alpaca API credentials
 APCA_API_BASE_URL = 'https://paper-api.alpaca.markets'

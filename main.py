@@ -5,7 +5,7 @@ from streaming import get_top_stocks
 from datetime import datetime, time
 from strategies import *
 from alpaca_trading import buy, sell, get_held_stocks, trade_count, sell_all_positions_before_market_close
-from config import CONSTANT_STOCKS, INTERVAL, HISTORICAL_PERIOD, EMA_PERIODS, NUMBER_OF_STOCKS, update_macd_dict
+from config import CONSTANT_STOCKS, INTERVAL, HISTORICAL_PERIOD, EMA_PERIODS, NUMBER_OF_STOCKS, Max_Trade_Count, update_macd_dict
 from database import *
 
 
@@ -39,6 +39,8 @@ macd_crossover = get_macd_crossover_from_database()
 signal_dict = {symbol: [] for symbol in stock_symbols}
 zero_dict = {symbol: [] for symbol in stock_symbols}
 
+# Set initial trade count for the day to 0
+trade_count = 0
 
 while True:
     current_time = datetime.now().time()
@@ -110,11 +112,13 @@ while True:
                     # Check if the stock meets the criteria to buy or sell
                     true_count = sum([macd_over_signal, macd_over_zero, macd_crossed_over_signal, macd_crossed_over_zero])
                     if true_count >= 3:
-                         if buy(symbol, price_history):
-                          print('Buy signal detected for', symbol, '. Executing buy order.')
-                          trade_count += 1
-                         if symbol not in CONSTANT_STOCKS and symbol not in added_stocks:
-                           added_stocks.append(symbol)
+                        if true_count >= 3:
+                            if trade_count <= Max_Trade_Count:
+                                if buy(symbol, price_history):
+                                    print('Buy signal detected for', symbol, '. Executing buy order.')
+                                    trade_count += 1
+                                    if symbol not in CONSTANT_STOCKS and symbol not in added_stocks:
+                                        added_stocks.append(symbol)
                     else:  # Otherwise, sell the stock only if it has 3 false values
                          false_count = 4 - true_count
                          if false_count >= 3:
