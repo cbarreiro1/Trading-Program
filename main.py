@@ -4,7 +4,7 @@ from time import sleep
 from streaming import get_top_stocks
 from datetime import datetime, time
 from strategies import *
-from alpaca_trading import buy, sell, get_held_stocks, trade_count, sell_all_positions_before_market_close
+from alpaca_trading import buy, sell, get_held_stocks, sell_all_positions_before_market_close
 from config import CONSTANT_STOCKS, INTERVAL, HISTORICAL_PERIOD, EMA_PERIODS, NUMBER_OF_STOCKS, Max_Trade_Count, update_macd_dict
 from database import *
 
@@ -113,7 +113,7 @@ while True:
                     true_count = sum([macd_over_signal, macd_over_zero, macd_crossed_over_signal, macd_crossed_over_zero])
                     if true_count >= 3:
                         if true_count >= 3:
-                            if trade_count <= Max_Trade_Count:
+                            if trade_count < Max_Trade_Count:
                                 if buy(symbol, price_history):
                                     print('Buy signal detected for', symbol, '. Executing buy order.')
                                     trade_count += 1
