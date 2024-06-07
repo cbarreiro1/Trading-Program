@@ -21,9 +21,9 @@ def update_macd_dict(macd_dict:dict, stocks:list):
             del macd_dict[key]
 
 # Set up variables before running
-CONSTANT_STOCKS = ['MLGO', 'VSTE', 'CORZ', 'HOLO',]
+CONSTANT_STOCKS = ['FBLG', 'LPA', 'GME', 'CODX',]
 NUMBER_OF_STOCKS = 7
-EXCLUDED_STOCKS = ['LPA', 'PLAG']
+EXCLUDED_STOCKS = ['TRSQ', 'PXDT']
 EMA_PERIODS = [12, 26, 9]
 INTERVAL = '5m'  # Interval for price data
 HISTORICAL_PERIOD = '60d'
@@ -35,9 +35,9 @@ Max_Trade_Count = 3
 # Alpaca API credentials
 APCA_API_BASE_URL = 'https://paper-api.alpaca.markets'
 APCA_API_KEY_ID = {'CJ': 'PKR50414JZBB8QBOTOGF',
-                   'Durston': 'PKJMI4B13T1PIG7LGHNR'}
+                   'Durston': 'PKTQ8VR4KYDXBJY63PSD'}
 APCA_API_SECRET_KEY = {'CJ': '63imlQJTyvFoMF2ipCGb7Z5lPcCTLyy',
-                       'Durston': 'fhNhKJtmw8VKAQrOI4LvXfDhihUz8T2mOyhEl6PX'}
+                       'Durston': 'BjIYSoFeNg9TotqTg5BOcMrI4pu8lj6Zpku57jOo'}
 
 # Webdriver path on local machine
 WEBDRIVER_PATH = {'CJ': 'C:\\Users\\cjgat\\Downloads\\chromedriver_win32\\chromedriver.exe',
