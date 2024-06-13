@@ -29,18 +29,22 @@ def get_top_stocks(number_to_look_for:int, excluded_stocks:list=[]) -> list:
         symbol = row.find_element(By.XPATH, './td[2]').text
         percent_change = row.find_element(By.XPATH, './td[4]').text
         percent_change = percent_change.strip('%').replace('$', '')  # Remove '%' and '$' characters
-        stocks.append({'symbol': symbol, 'percent_change': percent_change})
+        volume = row.find_element(By.XPATH, './td[6]').text
+        volume = volume.replace(',', '')  # Remove ',' characters
+        volume = int(volume)
+        if volume >= 400000:
+            stocks.append({'symbol': symbol, 'percent_change': percent_change, 'volume': volume})
 
     # Sort the stocks based on percent change in descending order
     sorted_stocks = sorted(stocks, key=lambda stock: float(stock['percent_change'].strip('%')), reverse=True)
     top_stocks = []
 
     # Print the top 3 stocks with the highest percent change (excluding those in CONSTANT_STOCKS)
-    print(f'Current Top Stocks Based on % Change')
+    print(f'Current Top Stocks Based on % Change with over 400,000 volume')
     count = 0
     for stock in sorted_stocks:
         if stock['symbol'] not in CONSTANT_STOCKS and stock['symbol'] not in excluded_stocks and count < number_to_look_for and stock['symbol'] not in EXCLUDED_STOCKS:
-            print(f"Symbol: {stock['symbol']}, Percent Change: {stock['percent_change']}")
+            print(f"Symbol: {stock['symbol']}, Percent Change: {stock['percent_change']}, Volume: {stock['volume']}")
             top_stocks.append(stock['symbol'])
             count += 1
 

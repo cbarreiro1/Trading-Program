@@ -138,7 +138,7 @@ while True:
                     print('MACD Crossover Signal:', macd_crossed_over_signal)
                     print('MACD Crossover Zero:', macd_crossed_over_zero)
                     print('Timestamp for', symbol, ':', timestamp)
-                    print('Trade Count', symbol, ':', trade_count)
+                    print('Trade Count:', trade_count)
 
                     # Add the information to the database
                     update_stock_data_table(symbol, latest_price, latest_macd, latest_signal, macd_crossover[symbol], macd_over_signal, macd_over_zero, macd_crossed_over_signal, macd_crossed_over_zero)
