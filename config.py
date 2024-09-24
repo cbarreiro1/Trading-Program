@@ -34,14 +34,8 @@ Max_Trade_Count = 3
 
 # Alpaca API credentials
 APCA_API_BASE_URL = 'https://paper-api.alpaca.markets'
-APCA_API_KEY_ID = {'CJ': 'PKLNIINH7S3F3P8YTEWP',
-                   'Durston': 'PKTQ8VR4KYDXBJY63PSD'}
-APCA_API_SECRET_KEY = {'CJ': '0QQwzKE5WqtjhXbjecwZBvO7G9XzfyvbaEL2mcUK',
-                       'Durston': 'BjIYSoFeNg9TotqTg5BOcMrI4pu8lj6Zpku57jOo'}
+APCA_API_KEY_ID = 'PUT_API_KEY_HERE'
+APCA_API_SECRET_KEY = 'PUT_SECRET_KEY_HERE'
 
 # Webdriver path on local machine
-WEBDRIVER_PATH = {'CJ': 'C:\\Users\\cjgat\\Downloads\\chromedriver_win32\\chromedriver.exe',
-                  'Durston': 'C:\\Users\\durst\\Downloads\\chromedriver.exe'}
-
-# Person running the code
-CODE_RUNNER = 'CJ'
+WEBDRIVER_PATH = 'C:\\Users\\cjgat\\Downloads\\chromedriver_win32\\chromedriver.exe'
